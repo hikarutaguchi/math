@@ -109,14 +109,33 @@ struct Col
 
 Col CheckColor(const Vector3 & intersept)
 {
-	if ((((int)(intersept.x / 10) + (int)(intersept.z / 10)) % 2) == 0)
+	bool flag = false;
+	if ((((int)(intersept.x / 50) + (int)(intersept.z / 50)) % 2) == 0)
 	{
+		flag = true;
 		//DrawPixel(x, y, GetColor(255, 255, 255));
+		//return Col(255, 255, 255);
+	}
+	else
+	{
+		flag = false;
+		//DrawPixel(x, y, GetColor(0, 0, 0));
+		//return Col(0, 0, 0);
+	}
+	if (intersept.x <= 0)
+	{
+		flag = !flag;
+	}
+	if (intersept.z <= 0)
+	{
+		flag = !flag;
+	}
+	if (flag)
+	{
 		return Col(255, 255, 255);
 	}
 	else
 	{
-		//DrawPixel(x, y, GetColor(0, 0, 0));
 		return Col(0, 0, 0);
 	}
 	//return Col(0, 0, 0);
@@ -130,7 +149,7 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 		for (int x = 0; x < screen_width; ++x) {//スクリーン横方向
 			//①視点とスクリーン座標から視線ベクトルを作る
 			//ここでrayを作る
-			Vector3 pos = { static_cast<float>(x - screen_width / 2), static_cast<float>(-(y - screen_height / 2)) , 0 };
+			Vector3 pos = { static_cast<float>(x - screen_width / 2), static_cast<float>(screen_height / 2 - y) , 0 };
 			Vector3 ray = pos - eye;
 			
 
@@ -142,7 +161,7 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 		/*	float brightness = min(max(normal*toLight,0) + ambient, 1.0f);
 */
 			float distance = 0.0f;
-			auto Light = Vector3(1, 1, -1);
+			auto Light = Vector3(1, -1, -1);
 			if (IsHitRayAndObject(eye, ray, sphere, distance))
 			{
 				int Color = 255;
@@ -233,6 +252,7 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 			}
 		}
 	}
+
 }
 
 void DrawPixelWithFloat(int x, int y, float r, float g, float b)
@@ -246,32 +266,39 @@ int main() {
 	SetMainWindowText(_T("1816045_田口ひかる"));
 	DxLib_Init();
 	//DrawBox(0, 0, screen_width, screen_height, GetColor(255,255,255), true);
-	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, -100)), Plane(Vector3(0, 1, 0), -100));
+	//RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, -100)), Plane(Vector3(0, 1, 0), -100));
 
-	//Sphere sp = Sphere(100, Position3(0, 0, -100));
-	//char Buf[256];
+	Sphere sphere = Sphere(100, Position3(0, 0, -100));
 
-	//GetHitKeyStateAll(Buf);
+	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
+	{
+		ClsDrawScreen();
 
-	//while (1)
-	//{
-	//	//ClsDrawScreen();
-	//	if (Buf[KEY_INPUT_LEFT] == 1)
-	//	{
-	//		sp.pos.x--;
-	//	}
-	//	if (Buf[KEY_INPUT_ESCAPE])
-	//	{
-	//		DxLib_End();
-	//	}
-	//	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(sp.pos.x, 0, -100)), Plane(Vector3(0, 1, 0), -50));
-	//	//ScreenFlip();
-	//}
+		if (CheckHitKey(KEY_INPUT_LEFT))
+		{
+			sphere.pos.x -= 3;
+		}
+		if (CheckHitKey(KEY_INPUT_RIGHT))
+		{
+			sphere.pos.x += 3;
+		}
+		if (CheckHitKey(KEY_INPUT_UP))
+		{
+			sphere.pos.y += 3;
+		}
+		if (CheckHitKey(KEY_INPUT_DOWN))
+		{
+			sphere.pos.y -= 3;
+		}
 
+		RayTracing(Vector3(0, 0, 300), sphere, Plane(Vector3(0, 1, 0), -100));
+
+		ScreenFlip();
+	}
 
 	
 
-	WaitKey();
+	//WaitKey();
 	
 }
 
