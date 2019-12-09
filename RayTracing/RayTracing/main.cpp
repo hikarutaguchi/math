@@ -130,7 +130,7 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 		for (int x = 0; x < screen_width; ++x) {//スクリーン横方向
 			//①視点とスクリーン座標から視線ベクトルを作る
 			//ここでrayを作る
-			Vector3 pos = { static_cast<float>(x - screen_width / 2), static_cast<float>(y - screen_height / 2) , 0 };
+			Vector3 pos = { static_cast<float>(x - screen_width / 2), static_cast<float>(-(y - screen_height / 2)) , 0 };
 			Vector3 ray = pos - eye;
 			
 
@@ -142,16 +142,12 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 		/*	float brightness = min(max(normal*toLight,0) + ambient, 1.0f);
 */
 			float distance = 0.0f;
-
+			auto Light = Vector3(1, 1, -1);
 			if (IsHitRayAndObject(eye, ray, sphere, distance))
 			{
-				/*	auto W = (sphere.radius * sphere.radius);
-
-					auto N = vec.Magnitude() - W;*/
-
 				int Color = 255;
 				auto N = (ray * distance - (sphere.pos - eye)).Normalized();
-				auto Light = Vector3(1, 1, -1);
+				
 				Light.Normalize();
 
 				// 反射ベクトル
@@ -181,15 +177,17 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 
 				auto t = (Dot(tmpPos, plane.normal) - plane.offset) / Dot(-tmpray, plane.normal);
 
-				auto Tpos = tmpPos + tmpray * t;
+				//auto Tpos = tmpPos + tmpray * t;
 
 				
-				if(Dot(tmpray,plane.normal) > 0)//当たっているかどうか)
-				{	//交点座標を求める
-
-					//auto Tpos = tempstart + tmpray * T;
+				if(Dot(-tmpray,plane.normal) > 0)//当たっているかどうか)
+				{	
+					auto aa = (tmpPos.y - plane.offset) / 100.0f;
+					//交点座標を求める
+					auto Tpos = tmpPos + tmpray * t;
 					auto col = CheckColor(Tpos);
 					DrawPixel(x,y,col.getcol());
+					//DrawPixel(x, y, GetColor(255 * aa, 255 * aa, 255 * aa));
 					continue;
 				}
 
@@ -198,14 +196,13 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 			}
 			else
 			{
-				if (Dot(ray, plane.normal) > 0)
+				if (Dot(-ray, plane.normal) > 0)
 				{
 					/*Plane pla(Position3(0, 1, 0), 5);
 					auto a = Dot(eye, pla.normal) - pla.offset;
 					auto b = Dot(-ray, pla.normal);
 					auto t = a / b;
 					auto as = eye + ray * t;
-
 
 					if ((((int)(as.x) + (int)(as.z)) % 2) == 0)
 					{
@@ -217,6 +214,19 @@ void RayTracing(const Position3& eye, const Sphere& sphere , const Plane& plane)
 					auto intersept = eye + ray * t;
 
 					auto as = CheckColor(intersept);
+					// 影の処理
+					//　今の色を半分にする。
+					// 交点interseptからLightの逆ベクトルと球体が交点を持つかどうかを判別
+					//if (球体と当たったら)
+					//{
+					//colのカラー値を半分にする。
+					//}
+					//if ()
+					//{
+					//	as.getcol / 0.5f;
+					//}
+
+					
 
 					DrawPixel(x,y,as.getcol());
 				}
@@ -236,10 +246,33 @@ int main() {
 	SetMainWindowText(_T("1816045_田口ひかる"));
 	DxLib_Init();
 	//DrawBox(0, 0, screen_width, screen_height, GetColor(255,255,255), true);
-	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, -100) ) ,Plane(Vector3(0,1,0),-100));
+	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(0, 0, -100)), Plane(Vector3(0, 1, 0), -100));
+
+	//Sphere sp = Sphere(100, Position3(0, 0, -100));
+	//char Buf[256];
+
+	//GetHitKeyStateAll(Buf);
+
+	//while (1)
+	//{
+	//	//ClsDrawScreen();
+	//	if (Buf[KEY_INPUT_LEFT] == 1)
+	//	{
+	//		sp.pos.x--;
+	//	}
+	//	if (Buf[KEY_INPUT_ESCAPE])
+	//	{
+	//		DxLib_End();
+	//	}
+	//	RayTracing(Vector3(0, 0, 300), Sphere(100, Position3(sp.pos.x, 0, -100)), Plane(Vector3(0, 1, 0), -50));
+	//	//ScreenFlip();
+	//}
+
+
+	
 
 	WaitKey();
-	DxLib_End();
+	
 }
 
 
